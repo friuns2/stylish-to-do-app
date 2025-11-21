@@ -1,5 +1,4 @@
 {
-  "name": "Apify Hotel Reviews Viewer",
-  "description": "An application to retrieve and display hotel reviews from Danang using the Apify 'Google Maps Scraper' Actor.",
-  "requestFramePermissions": []
+  "name": "Stylish To-Do App",
+  "description": "A simple and stylish To-Do List application built with React and Tailwind CSS for managing daily tasks."
 }
