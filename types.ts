@@ -1,5 +1,11 @@
-export interface Todo {
-  id: string;
+export interface Quote {
   text: string;
-  completed: boolean;
+  author?: string;
+}
+
+export enum GenerationStatus {
+  IDLE = 'IDLE',
+  LOADING = 'LOADING',
+  ERROR = 'ERROR',
+  SUCCESS = 'SUCCESS',
 }

@@ -1,4 +1,5 @@
 {
-  "name": "Stylish To-Do App",
-  "description": "A simple and stylish To-Do List application built with React and Tailwind CSS for managing daily tasks."
+  "name": "Cool Quotes Generator",
+  "description": "A simple React application that generates cool and inspiring quotes using the Gemini API.",
+  "requestFramePermissions": []
 }

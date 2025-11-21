@@ -1,48 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import TodoForm from './components/TodoForm';
-import TodoList from './components/TodoList';
-import { Todo } from './types';
+import React, { useState, useCallback } from 'react';
+import { generateCoolQuote } from './services/geminiService';
+import QuoteDisplay from './components/QuoteDisplay';
+import GenerateButton from './components/GenerateButton';
+import { Quote, GenerationStatus } from './types';
 
 function App() {
-  const [todos, setTodos] = useState<Todo[]>(() => {
-    // Initialize todos from localStorage if available
-    const savedTodos = localStorage.getItem('todos');
-    return savedTodos ? JSON.parse(savedTodos) : [];
-  });
+  const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
+  const [status, setStatus] = useState<GenerationStatus>(GenerationStatus.IDLE);
+  const [error, setError] = useState<string | null>(null);
 
-  // Save todos to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
-
-  const addTodo = (text: string) => {
-    const newTodo: Todo = {
-      id: Date.now().toString(), // Simple unique ID
-      text,
-      completed: false,
-    };
-    setTodos((prevTodos) => [...prevTodos, newTodo]);
-  };
-
-  const toggleTodo = (id: string) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
-  };
-
-  const deleteTodo = (id: string) => {
-    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-  };
+  const handleGenerateQuote = useCallback(async () => {
+    setStatus(GenerationStatus.LOADING);
+    setError(null);
+    try {
+      const quote = await generateCoolQuote();
+      setCurrentQuote(quote);
+      setStatus(GenerationStatus.SUCCESS);
+    } catch (e: any) {
+      console.error(e);
+      setError(e.message || 'Failed to generate quote.');
+      setStatus(GenerationStatus.ERROR);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
+  }, []); // Empty dependency array means this function is created once
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md mx-auto transform hover:scale-105 transition-transform duration-300">
-      <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-10 tracking-tight">
-        My <span className="text-blue-600">Tasks</span>
+    <div className="flex flex-col items-center justify-center p-4 min-h-screen">
+      <h1 className="text-5xl sm:text-6xl font-extrabold text-white mb-12 text-center drop-shadow-lg leading-tight">
+        Cool Quotes <span className="text-indigo-400">Generator</span>
       </h1>
-      <TodoForm onAdd={addTodo} />
-      <TodoList todos={todos} onToggleTodo={toggleTodo} onDeleteTodo={deleteTodo} />
+
+      <QuoteDisplay quote={currentQuote} status={status} error={error} />
+
+      <GenerateButton onClick={handleGenerateQuote} status={status} />
+
+      <p className="mt-8 text-sm text-gray-300 text-center max-w-md">
+        Powered by Google Gemini API.
+      </p>
     </div>
   );
 }
