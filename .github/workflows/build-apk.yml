@@ -44,11 +44,20 @@ jobs:
 
       - name: Create Capacitor config for GitHub Pages
         run: |
+          # Extract repository name and create app name/id
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          APP_NAME=$(echo "$REPO_NAME" | sed 's/-/ /g' | sed 's/\b\w/\U&/g')
+          APP_ID="com.github.${GITHUB_ACTOR}.${REPO_NAME}"
+
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "App Name: $APP_NAME"
+          echo "App ID: $APP_ID"
+
           # Create capacitor.config.json to use the published GitHub Pages URL
           cat > capacitor.config.json << EOF
           {
-            "appId": "com.ai.engineer.simulator",
-            "appName": "AI Engineer Job Simulator",
+            "appId": "$APP_ID",
+            "appName": "$APP_NAME",
             "webDir": "dist",
             "server": {
               "url": "https://${GITHUB_ACTOR}.github.io/${GITHUB_REPOSITORY#*/}/",
@@ -59,7 +68,12 @@ jobs:
 
       - name: Initialize Capacitor and add Android
         run: |
-          cap init "AI Engineer Job Simulator" "com.ai.engineer.simulator" --web-dir=dist
+          # Extract repository name and create app name/id (same as above)
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          APP_NAME=$(echo "$REPO_NAME" | sed 's/-/ /g' | sed 's/\b\w/\U&/g')
+          APP_ID="com.github.${GITHUB_ACTOR}.${REPO_NAME}"
+
+          cap init "$APP_NAME" "$APP_ID" --web-dir=dist
           cap add android
 
       - name: Copy Capacitor config to Android assets
