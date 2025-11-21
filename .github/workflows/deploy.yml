@@ -33,7 +33,7 @@ jobs:
         run: npm install
 
       - name: Build
-        run: npm run build
+        run: npm run build -- --base=/dsfdsf/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

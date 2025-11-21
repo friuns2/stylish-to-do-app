@@ -4,12 +4,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
-
-    // Get repository name for GitHub Pages base path
-    const repoName = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'dsfdsf';
-
     return {
-      base: mode === 'production' ? `/${repoName}/` : '/',
       server: {
         port: 3000,
         host: '0.0.0.0',
