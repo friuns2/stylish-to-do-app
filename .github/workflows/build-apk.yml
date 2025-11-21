@@ -34,7 +34,7 @@ jobs:
         run: npm install
 
       - name: Install Capacitor dependencies
-        run: npm install @capacitor/core @capacitor/cli @capacitor/android
+        run: npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
 
       - name: Install Capacitor CLI globally
         run: npm install -g @capacitor/cli
@@ -47,7 +47,10 @@ jobs:
           # Extract repository name and create app name/id
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
           APP_NAME=$(echo "$REPO_NAME" | sed 's/-/ /g' | sed 's/\b\w/\U&/g')
-          APP_ID="com.github.${GITHUB_ACTOR}.${REPO_NAME}"
+          # Convert dashes to underscores and ensure valid Java package format
+          SAFE_REPO_NAME=$(echo "$REPO_NAME" | sed 's/-/_/g' | sed 's/[^a-zA-Z0-9_]//g')
+          SAFE_ACTOR=$(echo "${GITHUB_ACTOR}" | sed 's/-/_/g' | sed 's/[^a-zA-Z0-9_]//g')
+          APP_ID="com.github.${SAFE_ACTOR}.${SAFE_REPO_NAME}"
 
           echo "Repository: $GITHUB_REPOSITORY"
           echo "App Name: $APP_NAME"
@@ -71,7 +74,10 @@ jobs:
           # Extract repository name and create app name/id (same as above)
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
           APP_NAME=$(echo "$REPO_NAME" | sed 's/-/ /g' | sed 's/\b\w/\U&/g')
-          APP_ID="com.github.${GITHUB_ACTOR}.${REPO_NAME}"
+          # Convert dashes to underscores and ensure valid Java package format
+          SAFE_REPO_NAME=$(echo "$REPO_NAME" | sed 's/-/_/g' | sed 's/[^a-zA-Z0-9_]//g')
+          SAFE_ACTOR=$(echo "${GITHUB_ACTOR}" | sed 's/-/_/g' | sed 's/[^a-zA-Z0-9_]//g')
+          APP_ID="com.github.${SAFE_ACTOR}.${SAFE_REPO_NAME}"
 
           cap init "$APP_NAME" "$APP_ID" --web-dir=dist
           cap add android
@@ -80,6 +86,28 @@ jobs:
         run: |
           mkdir -p android/app/src/main/assets
           cp capacitor.config.json android/app/src/main/assets/
+
+      - name: Setup icon and splash screen
+        run: |
+          # Install ImageMagick for image processing
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+          
+          # Create resources directory for Capacitor Assets
+          mkdir -p resources
+          
+          # Copy the icon
+          cp icon.png resources/icon.png
+          
+          # Create splash screen from icon (centered on white background)
+          convert icon.png -resize 2732x2732 -background white -gravity center -extent 2732x2732 resources/splash.png
+          
+          echo "✅ Icon and splash screen prepared"
+
+      - name: Generate app icons and splash screens
+        run: |
+          # Generate icons and splash screens using Capacitor Assets
+          npx @capacitor/assets generate --iconBackgroundColor '#ffffff' --iconBackgroundColorDark '#000000' --splashBackgroundColor '#ffffff' --splashBackgroundColorDark '#000000'
 
       - name: Sync Capacitor
         run: cap sync android
